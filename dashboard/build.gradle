@@ -63,8 +63,46 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
+// Task to extract native libraries and flatten them
+task extractNatives {
+    doLast {
+        def nativesDir = file("${buildDir}/natives")
+        nativesDir.mkdirs()
+        
+        // Extract from all JNI JARs on runtime classpath
+        configurations.runtimeClasspath.files.each { file ->
+            if (file.name.contains('-jni-') && file.name.endsWith('.jar')) {
+                copy {
+                    from zipTree(file)
+                    into nativesDir
+                    include '**/*.dylib'
+                    include '**/*.so'
+                    include '**/*.dll'
+                    eachFile { fileCopyDetails ->
+                        // Flatten: put all natives in root of nativesDir
+                        fileCopyDetails.path = fileCopyDetails.name
+                    }
+                    includeEmptyDirs = false
+                }
+            }
+        }
+        
+        println "Native libraries extracted to: ${nativesDir.absolutePath}"
+        nativesDir.listFiles().each { println "  - ${it.name}" }
+    }
+}
+
 // Run task configuration
 run {
+    dependsOn extractNatives
+    
+    // Add natives directory to java.library.path
+    doFirst {
+        def nativesPath = file("${buildDir}/natives").absolutePath
+        systemProperty 'java.library.path', nativesPath
+        println "java.library.path set to: ${nativesPath}"
+    }
+    
     // Add VM options for JavaFX
     jvmArgs = [
         '--add-opens', 'javafx.graphics/com.sun.javafx.application=ALL-UNNAMED'
