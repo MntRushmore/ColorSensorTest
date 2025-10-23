@@ -1,0 +1,294 @@
+/**
+ * FRC Dashboard - Purple FTC Theme Stylesheet
+ * 
+ * Color Palette:
+ * - Primary Purple: #6A1B9A (Dark purple)
+ * - Secondary Purple: #9C27B0 (Medium purple)
+ * - Light Purple: #E0B0FF (Lavender)
+ * - Accent Purple: #BB86FC (Bright purple)
+ * - Dark Background: #1A0D26 (Very dark purple)
+ * - Panel Background: #2D1B3D (Dark purple)
+ * - Success Green: #4CAF50
+ * - Error Red: #FF6B6B
+ * - Warning Orange: #FFA500
+ */
+
+/* ===== Root and Main Containers ===== */
+
+.dashboard-root {
+    -fx-background-color: #1A0D26;
+}
+
+.header {
+    -fx-background-color: linear-gradient(to bottom, #6A1B9A, #9C27B0);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 10, 0, 0, 2);
+}
+
+.telemetry-grid {
+    -fx-background-color: #1A0D26;
+}
+
+.controls-panel {
+    -fx-background-color: #2D1B3D;
+    -fx-border-color: #6A1B9A;
+    -fx-border-width: 0 0 0 2;
+}
+
+.status-bar {
+    -fx-background-color: #2D1B3D;
+    -fx-border-color: #6A1B9A;
+    -fx-border-width: 2 0 0 0;
+}
+
+/* ===== Telemetry Panels ===== */
+
+.telemetry-panel {
+    -fx-background-color: #2D1B3D;
+    -fx-background-radius: 10;
+    -fx-border-color: #6A1B9A;
+    -fx-border-width: 2;
+    -fx-border-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(106, 27, 154, 0.3), 15, 0, 0, 0);
+}
+
+.panel-title {
+    -fx-text-fill: #E0B0FF;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.data-label {
+    -fx-text-fill: #BB86FC;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.value-label {
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-family: "Courier New", monospace;
+    -fx-font-weight: bold;
+}
+
+.highlighted-value {
+    -fx-text-fill: #FFD700;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.state-label {
+    -fx-text-fill: #E0B0FF;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+/* ===== Control Sections ===== */
+
+.control-section {
+    -fx-background-color: #3D2B4D;
+    -fx-background-radius: 8;
+    -fx-border-color: #6A1B9A;
+    -fx-border-width: 2;
+    -fx-border-radius: 8;
+}
+
+.control-title {
+    -fx-text-fill: #E0B0FF;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+/* ===== Buttons ===== */
+
+.control-button {
+    -fx-background-color: #6A1B9A;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 10 20;
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 5, 0, 0, 2);
+}
+
+.control-button:hover {
+    -fx-background-color: #9C27B0;
+    -fx-effect: dropshadow(gaussian, rgba(156, 39, 176, 0.5), 10, 0, 0, 3);
+}
+
+.control-button:pressed {
+    -fx-background-color: #4A0E6E;
+    -fx-translate-y: 1;
+}
+
+.test-button {
+    -fx-background-color: #BB86FC;
+    -fx-text-fill: #1A0D26;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 8 15;
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+}
+
+.test-button:hover {
+    -fx-background-color: #E0B0FF;
+}
+
+.test-button:pressed {
+    -fx-background-color: #9C6FD8;
+    -fx-translate-y: 1;
+}
+
+.stop-button {
+    -fx-background-color: #FF6B6B;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 10 20;
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+}
+
+.stop-button:hover {
+    -fx-background-color: #FF5252;
+}
+
+.stop-button:pressed {
+    -fx-background-color: #D84545;
+    -fx-translate-y: 1;
+}
+
+.calibrate-button {
+    -fx-background-color: #9C27B0;
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 8 15;
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+}
+
+.calibrate-button:hover {
+    -fx-background-color: #BB86FC;
+}
+
+.calibrate-button:pressed {
+    -fx-background-color: #6A1B9A;
+    -fx-translate-y: 1;
+}
+
+.save-button {
+    -fx-background-color: #4CAF50;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 10 20;
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+}
+
+.save-button:hover {
+    -fx-background-color: #66BB6A;
+}
+
+.save-button:pressed {
+    -fx-background-color: #388E3C;
+    -fx-translate-y: 1;
+}
+
+/* ===== Input Fields ===== */
+
+.control-field {
+    -fx-background-color: #1A0D26;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 8 12;
+    -fx-background-radius: 5;
+    -fx-border-color: #6A1B9A;
+    -fx-border-width: 2;
+    -fx-border-radius: 5;
+}
+
+.control-field:focused {
+    -fx-border-color: #BB86FC;
+    -fx-effect: dropshadow(gaussian, rgba(187, 134, 252, 0.5), 5, 0, 0, 0);
+}
+
+.control-combo {
+    -fx-background-color: #1A0D26;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-border-color: #6A1B9A;
+    -fx-border-width: 2;
+    -fx-border-radius: 5;
+}
+
+.control-combo:hover {
+    -fx-border-color: #BB86FC;
+}
+
+.control-combo .list-cell {
+    -fx-background-color: #2D1B3D;
+    -fx-text-fill: white;
+}
+
+.control-combo .list-cell:hover {
+    -fx-background-color: #6A1B9A;
+}
+
+/* ===== Sliders ===== */
+
+.control-slider .track {
+    -fx-background-color: #3D2B4D;
+    -fx-background-radius: 5;
+}
+
+.control-slider .thumb {
+    -fx-background-color: #BB86FC;
+    -fx-background-radius: 50%;
+    -fx-cursor: hand;
+}
+
+.control-slider .thumb:hover {
+    -fx-background-color: #E0B0FF;
+}
+
+.control-slider .thumb:pressed {
+    -fx-background-color: #9C27B0;
+}
+
+/* ===== ScrollPane ===== */
+
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar:vertical {
+    -fx-background-color: #2D1B3D;
+}
+
+.scroll-bar:vertical .thumb {
+    -fx-background-color: #6A1B9A;
+    -fx-background-radius: 5;
+}
+
+.scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #9C27B0;
+}
+
+/* ===== Tooltips ===== */
+
+.tooltip {
+    -fx-background-color: #2D1B3D;
+    -fx-text-fill: white;
+    -fx-border-color: #6A1B9A;
+    -fx-border-width: 2;
+    -fx-font-size: 12px;
+    -fx-background-radius: 5;
+    -fx-border-radius: 5;
+}

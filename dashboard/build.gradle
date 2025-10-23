@@ -1,0 +1,121 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.1.0'
+}
+
+group = 'frc.dashboard'
+version = '1.0.0'
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
+
+// Main class for the dashboard application
+application {
+    mainClass = 'frc.dashboard.FRCDashboardApp'
+}
+
+// JavaFX configuration
+javafx {
+    version = '21.0.1'
+    modules = ['javafx.controls', 'javafx.fxml', 'javafx.graphics']
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url = 'https://frcmaven.wpi.edu/artifactory/release/'
+    }
+}
+
+dependencies {
+    // WPILib NetworkTables for robot communication
+    implementation 'edu.wpi.first.ntcore:ntcore-java:2025.3.2'
+    implementation 'edu.wpi.first.wpiutil:wpiutil-java:2025.3.2'
+    
+    // NetworkTables native libraries - WPILib will extract these from classpath resources
+    implementation group: 'edu.wpi.first.ntcore', name: 'ntcore-jni', version: '2025.3.2', classifier: 'osxuniversal'
+    implementation group: 'edu.wpi.first.ntcore', name: 'ntcore-jni', version: '2025.3.2', classifier: 'linuxx86-64'
+    implementation group: 'edu.wpi.first.ntcore', name: 'ntcore-jni', version: '2025.3.2', classifier: 'linuxarm64'
+    implementation group: 'edu.wpi.first.ntcore', name: 'ntcore-jni', version: '2025.3.2', classifier: 'windowsx86-64'
+    
+    implementation group: 'edu.wpi.first.wpiutil', name: 'wpiutil-jni', version: '2025.3.2', classifier: 'osxuniversal'
+    implementation group: 'edu.wpi.first.wpiutil', name: 'wpiutil-jni', version: '2025.3.2', classifier: 'linuxx86-64'
+    implementation group: 'edu.wpi.first.wpiutil', name: 'wpiutil-jni', version: '2025.3.2', classifier: 'linuxarm64'
+    implementation group: 'edu.wpi.first.wpiutil', name: 'wpiutil-jni', version: '2025.3.2', classifier: 'windowsx86-64'
+    
+    // Jackson JSON - Required by NetworkTables for JSON serialization
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.15.2'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.15.2'
+    
+    // JavaFX dependencies (managed by plugin)
+    
+    // Logging
+    implementation 'org.slf4j:slf4j-api:2.0.9'
+    implementation 'org.slf4j:slf4j-simple:2.0.9'
+    
+    // JSON parsing for configuration
+    implementation 'com.google.code.gson:gson:2.10.1'
+}
+
+// Configure Java compilation to use UTF-8
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+// Task to extract native libraries and flatten them
+task extractNatives {
+    doLast {
+        def nativesDir = file("${buildDir}/natives")
+        nativesDir.mkdirs()
+        
+        // Extract from all JNI JARs on runtime classpath
+        configurations.runtimeClasspath.files.each { file ->
+            if (file.name.contains('-jni-') && file.name.endsWith('.jar')) {
+                copy {
+                    from zipTree(file)
+                    into nativesDir
+                    include '**/*.dylib'
+                    include '**/*.so'
+                    include '**/*.dll'
+                    eachFile { fileCopyDetails ->
+                        // Flatten: put all natives in root of nativesDir
+                        fileCopyDetails.path = fileCopyDetails.name
+                    }
+                    includeEmptyDirs = false
+                }
+            }
+        }
+        
+        println "Native libraries extracted to: ${nativesDir.absolutePath}"
+        nativesDir.listFiles().each { println "  - ${it.name}" }
+    }
+}
+
+// Run task configuration
+run {
+    dependsOn extractNatives
+    
+    // Add natives directory to java.library.path
+    doFirst {
+        def nativesPath = file("${buildDir}/natives").absolutePath
+        systemProperty 'java.library.path', nativesPath
+        println "java.library.path set to: ${nativesPath}"
+    }
+    
+    // Add VM options for JavaFX
+    jvmArgs = [
+        '--add-opens', 'javafx.graphics/com.sun.javafx.application=ALL-UNNAMED'
+    ]
+}
+
+// Create executable jar
+jar {
+    manifest {
+        attributes 'Main-Class': 'frc.dashboard.FRCDashboardApp'
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}

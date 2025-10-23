@@ -18,8 +18,20 @@ public final class Main {
    * Main initialization function. Do not perform any initialization here.
    *
    * <p>If you change your main robot class, change the parameter type.
+   * 
+   * Available Robot Classes:
+   * - SingleMotorTestRobot::new - Test with ONE motor, different speeds per button
+   * - MotorTestRobot::new - Test all motors individually
+   * - ColorSensorTestRobot::new - Test color sensor
+   * - Robot::new - Full ball sorting system
    */
   public static void main(String... args) {
-    RobotBase.startRobot(Robot::new);
+    // Single motor testing mode - CURRENTLY ACTIVE
+    RobotBase.startRobot(SingleMotorTestRobot::new);
+    
+    // Uncomment below for other modes:
+    // RobotBase.startRobot(MotorTestRobot::new);
+    // RobotBase.startRobot(ColorSensorTestRobot::new);
+    // RobotBase.startRobot(Robot::new);
   }
 }
