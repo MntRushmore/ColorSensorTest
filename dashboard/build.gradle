@@ -81,6 +81,7 @@ tasks.withType(JavaCompile) {
 
 // Task to extract native libraries from JNI JARs
 task extractNatives {
+    outputs.dir("${buildDir}/natives")
     doLast {
         def nativesDir = file("${buildDir}/natives")
         nativesDir.mkdirs()
