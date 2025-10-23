@@ -80,6 +80,9 @@ public class SingleMotorTestRobot extends TimedRobot {
             System.out.println("Error: " + e.getMessage());
         }
         
+        System.out.println("");
+        System.out.println("⚠️  MOTOR STARTS IN STOPPED MODE");
+        System.out.println("Press any button to start the motor!");
         System.out.println("Ready to test!");
     }
     
@@ -88,22 +91,22 @@ public class SingleMotorTestRobot extends TimedRobot {
         // PS4 Button mapping
         if (controller.getRawButtonPressed(2)) { // Cross (X)
             currentMode = MotorMode.INTAKE;
-            System.out.println(">>> INTAKE MODE - Running at " + intakeSpeed);
+            System.out.println(">>> ✅ INTAKE MODE ACTIVATED - Running at " + intakeSpeed);
         }
         
         if (controller.getRawButtonPressed(3)) { // Circle (O)
             currentMode = MotorMode.OUTTAKE_1;
-            System.out.println(">>> OUTTAKE 1 MODE - Running at " + outtake1Speed);
+            System.out.println(">>> ✅ OUTTAKE 1 MODE ACTIVATED - Running at " + outtake1Speed);
         }
         
         if (controller.getRawButtonPressed(1)) { // Square
             currentMode = MotorMode.OUTTAKE_2;
-            System.out.println(">>> OUTTAKE 2 MODE - Running at " + outtake2Speed);
+            System.out.println(">>> ✅ OUTTAKE 2 MODE ACTIVATED - Running at " + outtake2Speed);
         }
         
         if (controller.getRawButtonPressed(4)) { // Triangle
             currentMode = MotorMode.STOPPED;
-            System.out.println(">>> STOPPED");
+            System.out.println(">>> ⛔ MOTOR STOPPED");
         }
         
         // Speed adjustment with D-Pad
@@ -132,14 +135,6 @@ public class SingleMotorTestRobot extends TimedRobot {
         }
         
         testMotor.setControl(new DutyCycleOut(motorSpeed));
-        
-        // Debug output every ~1 second
-        if (Math.random() < 0.02) {
-            System.out.println("[DEBUG] Mode: " + currentMode + 
-                             " | Speed: " + motorSpeed +
-                             " | Temp: " + testMotor.getDeviceTemp().getValueAsDouble() + "°C" +
-                             " | Current: " + testMotor.getSupplyCurrent().getValueAsDouble() + "A");
-        }
     }
     
     /**
@@ -178,8 +173,28 @@ public class SingleMotorTestRobot extends TimedRobot {
         System.out.println("Motor testing disabled - Motor stopped");
     }
     
+    private int loopCounter = 0;
+    
     @Override
     public void robotPeriodic() {
-        // This runs in all modes
+        // Print status every 50 loops (~1 second)
+        loopCounter++;
+        if (loopCounter >= 50) {
+            loopCounter = 0;
+            
+            double speed = 0.0;
+            switch (currentMode) {
+                case INTAKE: speed = intakeSpeed; break;
+                case OUTTAKE_1: speed = outtake1Speed; break;
+                case OUTTAKE_2: speed = outtake2Speed; break;
+                case STOPPED: speed = 0.0; break;
+            }
+            
+            System.out.println("────────────────────────────────────────");
+            System.out.println("📊 STATUS: Mode=" + currentMode + " | Speed=" + speed);
+            System.out.println("🌡️  Temp: " + testMotor.getDeviceTemp().getValueAsDouble() + "°C");
+            System.out.println("⚡ Current: " + testMotor.getSupplyCurrent().getValueAsDouble() + "A");
+            System.out.println("────────────────────────────────────────");
+        }
     }
 }
