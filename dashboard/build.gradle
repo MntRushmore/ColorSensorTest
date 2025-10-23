@@ -27,21 +27,37 @@ repositories {
     }
 }
 
+// Configuration for native libraries
+configurations {
+    nativeLibs
+}
+
 dependencies {
     // WPILib NetworkTables for robot communication
     implementation 'edu.wpi.first.ntcore:ntcore-java:2025.3.2'
     implementation 'edu.wpi.first.wpiutil:wpiutil-java:2025.3.2'
     
     // NetworkTables native libraries for all platforms
-    implementation 'edu.wpi.first.ntcore:ntcore-jni:2025.3.2:osxuniversal'
-    implementation 'edu.wpi.first.ntcore:ntcore-jni:2025.3.2:linuxx86-64'
-    implementation 'edu.wpi.first.ntcore:ntcore-jni:2025.3.2:linuxarm64'
-    implementation 'edu.wpi.first.ntcore:ntcore-jni:2025.3.2:windowsx86-64'
+    nativeLibs 'edu.wpi.first.ntcore:ntcore-jni:2025.3.2:osxuniversal'
+    nativeLibs 'edu.wpi.first.ntcore:ntcore-jni:2025.3.2:linuxx86-64'
+    nativeLibs 'edu.wpi.first.ntcore:ntcore-jni:2025.3.2:linuxarm64'
+    nativeLibs 'edu.wpi.first.ntcore:ntcore-jni:2025.3.2:windowsx86-64'
     
-    implementation 'edu.wpi.first.wpiutil:wpiutil-jni:2025.3.2:osxuniversal'
-    implementation 'edu.wpi.first.wpiutil:wpiutil-jni:2025.3.2:linuxx86-64'
-    implementation 'edu.wpi.first.wpiutil:wpiutil-jni:2025.3.2:linuxarm64'
-    implementation 'edu.wpi.first.wpiutil:wpiutil-jni:2025.3.2:windowsx86-64'
+    nativeLibs 'edu.wpi.first.wpiutil:wpiutil-jni:2025.3.2:osxuniversal'
+    nativeLibs 'edu.wpi.first.wpiutil:wpiutil-jni:2025.3.2:linuxx86-64'
+    nativeLibs 'edu.wpi.first.wpiutil:wpiutil-jni:2025.3.2:linuxarm64'
+    nativeLibs 'edu.wpi.first.wpiutil:wpiutil-jni:2025.3.2:windowsx86-64'
+    
+    // Also add to runtime classpath
+    runtimeOnly 'edu.wpi.first.ntcore:ntcore-jni:2025.3.2:osxuniversal'
+    runtimeOnly 'edu.wpi.first.ntcore:ntcore-jni:2025.3.2:linuxx86-64'
+    runtimeOnly 'edu.wpi.first.ntcore:ntcore-jni:2025.3.2:linuxarm64'
+    runtimeOnly 'edu.wpi.first.ntcore:ntcore-jni:2025.3.2:windowsx86-64'
+    
+    runtimeOnly 'edu.wpi.first.wpiutil:wpiutil-jni:2025.3.2:osxuniversal'
+    runtimeOnly 'edu.wpi.first.wpiutil:wpiutil-jni:2025.3.2:linuxx86-64'
+    runtimeOnly 'edu.wpi.first.wpiutil:wpiutil-jni:2025.3.2:linuxarm64'
+    runtimeOnly 'edu.wpi.first.wpiutil:wpiutil-jni:2025.3.2:windowsx86-64'
     
     // Jackson JSON - Required by NetworkTables for JSON serialization
     implementation 'com.fasterxml.jackson.core:jackson-core:2.15.2'
@@ -63,12 +79,24 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
+// Task to extract native libraries
+task extractNatives(type: Copy) {
+    from configurations.nativeLibs
+    into "${buildDir}/natives"
+}
+
 // Run task configuration
 run {
-    // Add VM options for JavaFX if needed
+    dependsOn extractNatives
+    
+    // Add VM options for JavaFX and native library path
     jvmArgs = [
-        '--add-opens', 'javafx.graphics/com.sun.javafx.application=ALL-UNNAMED'
+        '--add-opens', 'javafx.graphics/com.sun.javafx.application=ALL-UNNAMED',
+        "-Djava.library.path=${buildDir}/natives"
     ]
+    
+    // Set system property for WPILib RuntimeLoader
+    systemProperty 'edu.wpi.first.runtime.extractOnStatic', 'true'
 }
 
 // Create executable jar
