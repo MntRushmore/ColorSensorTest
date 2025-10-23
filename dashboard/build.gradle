@@ -79,15 +79,33 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
-// Task to extract native libraries
-task extractNatives(type: Copy) {
-    from configurations.nativeLibs
-    into "${buildDir}/natives"
+// Task to extract native libraries from JNI JARs
+task extractNatives {
+    outputs.dir("${buildDir}/natives")
+    doLast {
+        def nativesDir = file("${buildDir}/natives")
+        nativesDir.mkdirs()
+        
+        configurations.nativeLibs.files.findAll { it.name.endsWith('.jar') }.each { file ->
+            copy {
+                from zipTree(file)
+                into nativesDir
+                include 'osx/**/*.dylib'      // macOS with directory structure
+                include 'linux/**/*.so'       // Linux with directory structure
+                include 'windows/**/*.dll'    // Windows with directory structure
+                include '**/*.hash'           // Include hash files too
+                includeEmptyDirs = false
+            }
+        }
+    }
 }
 
 // Run task configuration
 run {
     dependsOn extractNatives
+    
+    // Add natives directory to classpath so WPILib RuntimeLoader can find libraries
+    classpath += files("${buildDir}/natives")
     
     // Add VM options for JavaFX and native library path
     jvmArgs = [
@@ -95,8 +113,9 @@ run {
         "-Djava.library.path=${buildDir}/natives"
     ]
     
-    // Set system property for WPILib RuntimeLoader
-    systemProperty 'edu.wpi.first.runtime.extractOnStatic', 'true'
+    // Set system properties for WPILib RuntimeLoader
+    systemProperty 'edu.wpi.first.runtime.extractOnStatic', 'false'
+    systemProperty 'wpiutil.loadLibrary', 'false'
 }
 
 // Create executable jar
