@@ -83,27 +83,50 @@ public class SingleMotorTestRobot extends TimedRobot {
         System.out.println("Ready to test!");
     }
     
+    private int debugCounter = 0;
+    
     @Override
     public void teleopPeriodic() {
+        debugCounter++;
+        
+        // AGGRESSIVE BUTTON DETECTION - Check ALL buttons every loop
+        System.out.println("\n🔍 [BUTTON CHECK " + debugCounter + "]");
+        System.out.println("Button 1: " + controller.getRawButton(1) + " | Button 2: " + controller.getRawButton(2));
+        System.out.println("Button 3: " + controller.getRawButton(3) + " | Button 4: " + controller.getRawButton(4));
+        System.out.println("Button 5: " + controller.getRawButton(5) + " | Button 6: " + controller.getRawButton(6));
+        System.out.println("POV: " + controller.getPOV() + " | Axis 0: " + controller.getRawAxis(0));
+        
+        // Check if ANY button is pressed at all
+        boolean anyButton = false;
+        for (int i = 1; i <= 12; i++) {
+            if (controller.getRawButton(i)) {
+                System.out.println("🎮 DETECTED: Button " + i + " is PRESSED!");
+                anyButton = true;
+            }
+        }
+        if (!anyButton) {
+            System.out.println("❌ NO BUTTONS DETECTED - Is controller connected?");
+        }
+        
         // PS4 Button mapping
         if (controller.getRawButtonPressed(2)) { // Cross (X)
             currentMode = MotorMode.INTAKE;
-            System.out.println(">>> INTAKE MODE - Running at " + intakeSpeed);
+            System.out.println(">>> ✅✅✅ INTAKE MODE ACTIVATED - Running at " + intakeSpeed);
         }
         
         if (controller.getRawButtonPressed(3)) { // Circle (O)
             currentMode = MotorMode.OUTTAKE_1;
-            System.out.println(">>> OUTTAKE 1 MODE - Running at " + outtake1Speed);
+            System.out.println(">>> ✅✅✅ OUTTAKE 1 MODE ACTIVATED - Running at " + outtake1Speed);
         }
         
         if (controller.getRawButtonPressed(1)) { // Square
             currentMode = MotorMode.OUTTAKE_2;
-            System.out.println(">>> OUTTAKE 2 MODE - Running at " + outtake2Speed);
+            System.out.println(">>> ✅✅✅ OUTTAKE 2 MODE ACTIVATED - Running at " + outtake2Speed);
         }
         
         if (controller.getRawButtonPressed(4)) { // Triangle
             currentMode = MotorMode.STOPPED;
-            System.out.println(">>> STOPPED");
+            System.out.println(">>> ⛔⛔⛔ STOPPED");
         }
         
         // Speed adjustment with D-Pad
@@ -131,14 +154,17 @@ public class SingleMotorTestRobot extends TimedRobot {
                 break;
         }
         
+        System.out.println("📊 Current Mode: " + currentMode + " | Sending Speed: " + motorSpeed + " to motor");
         testMotor.setControl(new DutyCycleOut(motorSpeed));
         
-        // Debug output every ~1 second
-        if (Math.random() < 0.02) {
-            System.out.println("[DEBUG] Mode: " + currentMode + 
-                             " | Speed: " + motorSpeed +
-                             " | Temp: " + testMotor.getDeviceTemp().getValueAsDouble() + "°C" +
-                             " | Current: " + testMotor.getSupplyCurrent().getValueAsDouble() + "A");
+        System.out.println("⚡ Motor Current: " + testMotor.getSupplyCurrent().getValueAsDouble() + "A");
+        System.out.println("────────────────────────────────────────\n");
+        
+        // Slow down the loop so we can actually read this!
+        try {
+            Thread.sleep(200);  // Wait 200ms between loops
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
     
