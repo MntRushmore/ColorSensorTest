@@ -1,0 +1,67 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.1.0'
+}
+
+group = 'frc.dashboard'
+version = '1.0.0'
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
+
+// Main class for the dashboard application
+application {
+    mainClass = 'frc.dashboard.FRCDashboardApp'
+}
+
+// JavaFX configuration
+javafx {
+    version = '21.0.1'
+    modules = ['javafx.controls', 'javafx.fxml', 'javafx.graphics']
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url = 'https://frcmaven.wpi.edu/artifactory/release/'
+    }
+}
+
+dependencies {
+    // WPILib NetworkTables for robot communication
+    implementation 'edu.wpi.first.ntcore:ntcore-java:2025.3.2'
+    implementation 'edu.wpi.first.wpiutil:wpiutil-java:2025.3.2'
+    
+    // JavaFX dependencies (managed by plugin)
+    
+    // Logging
+    implementation 'org.slf4j:slf4j-api:2.0.9'
+    implementation 'org.slf4j:slf4j-simple:2.0.9'
+    
+    // JSON parsing for configuration
+    implementation 'com.google.code.gson:gson:2.10.1'
+}
+
+// Configure Java compilation to use UTF-8
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+// Run task configuration
+run {
+    // Add VM options for JavaFX if needed
+    jvmArgs = [
+        '--add-opens', 'javafx.graphics/com.sun.javafx.application=ALL-UNNAMED'
+    ]
+}
+
+// Create executable jar
+jar {
+    manifest {
+        attributes 'Main-Class': 'frc.dashboard.FRCDashboardApp'
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
