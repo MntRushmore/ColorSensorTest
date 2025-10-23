@@ -1,20 +1,23 @@
 package frc.dashboard;
 
-import edu.wpi.first.util.CombinedRuntimeLoader;
-import java.io.IOException;
-import java.util.List;
+import edu.wpi.first.networktables.NetworkTablesJNI;
+import edu.wpi.first.util.WPIUtilJNI;
 
 /**
- * Helper class to manually load WPILib JNI libraries before NetworkTables initialization.
- * This ensures native libraries are loaded using WPILib's CombinedRuntimeLoader
- * instead of System.loadLibrary().
+ * Helper class to force-load WPILib JNI libraries before NetworkTables initialization.
+ * 
+ * The issue: NetworkTableInstance.getDefault() triggers a static initializer that uses
+ * System.loadLibrary() which fails because libraries aren't in java.library.path.
+ * 
+ * The solution: Call the JNI classes' static initializers explicitly, which use
+ * WPILib's CombinedRuntimeLoader to properly extract and load from classpath JARs.
  */
 public class JNILoader {
     
     private static boolean loaded = false;
     
     /**
-     * Load all required WPILib native libraries.
+     * Load all required WPILib native libraries by triggering static initializers.
      * Must be called before any NetworkTables usage.
      */
     public static synchronized void loadLibraries() {
@@ -25,36 +28,24 @@ public class JNILoader {
         try {
             System.out.println("Loading WPILib native libraries...");
             
-            // Load wpiutil first (ntcore depends on it)
-            List<String> wpiutilFiles = CombinedRuntimeLoader.extractLibraries(
-                JNILoader.class, 
-                "/wpiutil-jni.json"
-            );
+            // Force load WPIUtil JNI (must be first - ntcore depends on it)
+            // This triggers WPIUtilJNI's static initializer which uses CombinedRuntimeLoader
+            Class.forName("edu.wpi.first.util.WPIUtilJNI");
+            System.out.println("✓ WPIUtil JNI loaded");
             
-            for (String file : wpiutilFiles) {
-                if (file.contains("wpiutil")) {
-                    System.out.println("Loading wpiutil from: " + file);
-                    System.load(file);
-                }
-            }
-            
-            // Load ntcore
-            List<String> ntcoreFiles = CombinedRuntimeLoader.extractLibraries(
-                JNILoader.class,
-                "/ntcore-jni.json"
-            );
-            
-            for (String file : ntcoreFiles) {
-                if (file.contains("ntcore")) {
-                    System.out.println("Loading ntcore from: " + file);
-                    System.load(file);
-                }
-            }
+            // Force load NetworkTables JNI
+            // This triggers NetworkTablesJNI's static initializer
+            Class.forName("edu.wpi.first.networktables.NetworkTablesJNI");
+            System.out.println("✓ NetworkTables JNI loaded");
             
             loaded = true;
             System.out.println("Successfully loaded all native libraries!");
             
-        } catch (IOException e) {
+        } catch (ClassNotFoundException e) {
+            System.err.println("Failed to load JNI classes: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Could not load WPILib JNI classes", e);
+        } catch (UnsatisfiedLinkError e) {
             System.err.println("Failed to load native libraries: " + e.getMessage());
             e.printStackTrace();
             throw new RuntimeException("Could not load WPILib native libraries", e);
