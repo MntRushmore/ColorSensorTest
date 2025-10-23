@@ -4,7 +4,6 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.controls.DutyCycleOut;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * Single Motor Test Robot
@@ -115,21 +114,6 @@ public class SingleMotorTestRobot extends TimedRobot {
         }
         
         testMotor.setControl(new DutyCycleOut(motorSpeed));
-        
-        // Update telemetry
-        SmartDashboard.putString("Motor Mode", currentMode.toString());
-        SmartDashboard.putNumber("Current Speed", motorSpeed);
-        SmartDashboard.putNumber("Intake Speed", intakeSpeed);
-        SmartDashboard.putNumber("Outtake 1 Speed", outtake1Speed);
-        SmartDashboard.putNumber("Outtake 2 Speed", outtake2Speed);
-        SmartDashboard.putNumber("Motor Current (A)", testMotor.getSupplyCurrent().getValueAsDouble());
-        SmartDashboard.putNumber("Motor Temperature (C)", testMotor.getDeviceTemp().getValueAsDouble());
-        
-        // Controller info
-        SmartDashboard.putBoolean("A Button (Intake)", controller.getRawButton(1));
-        SmartDashboard.putBoolean("B Button (Outtake 1)", controller.getRawButton(2));
-        SmartDashboard.putBoolean("X Button (Outtake 2)", controller.getRawButton(3));
-        SmartDashboard.putBoolean("Y Button (Stop)", controller.getRawButton(4));
     }
     
     /**
