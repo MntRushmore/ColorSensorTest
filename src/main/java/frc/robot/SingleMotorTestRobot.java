@@ -42,11 +42,11 @@ public class SingleMotorTestRobot extends TimedRobot {
         System.out.println("========================================");
         System.out.println("=== SINGLE MOTOR TEST ROBOT MODE ===");
         System.out.println("========================================");
-        System.out.println("Controller Button Mapping:");
-        System.out.println("  A Button (1): INTAKE (Fast Speed: " + intakeSpeed + ")");
-        System.out.println("  B Button (2): OUTTAKE 1 (Speed: " + outtake1Speed + ")");
-        System.out.println("  X Button (3): OUTTAKE 2 (Speed: " + outtake2Speed + ")");
-        System.out.println("  Y Button (4): STOP MOTOR");
+        System.out.println("PS4 Controller Button Mapping:");
+        System.out.println("  Cross (X) - Button 2: INTAKE (Fast Speed: " + intakeSpeed + ")");
+        System.out.println("  Circle (O) - Button 3: OUTTAKE 1 (Speed: " + outtake1Speed + ")");
+        System.out.println("  Square - Button 1: OUTTAKE 2 (Speed: " + outtake2Speed + ")");
+        System.out.println("  Triangle - Button 4: STOP MOTOR");
         System.out.println("");
         System.out.println("Speed Adjustment:");
         System.out.println("  D-Pad Up: Increase current speed by 0.05");
@@ -55,7 +55,7 @@ public class SingleMotorTestRobot extends TimedRobot {
         System.out.println("Notes:");
         System.out.println("  - Only ONE physical motor needed");
         System.out.println("  - Each button runs motor at different speed");
-        System.out.println("  - Test your controller mapping before final setup");
+        System.out.println("  - Using PS4 controller mapping");
         System.out.println("========================================");
         
         // Initialize the test motor (using intake motor ID by default)
@@ -67,23 +67,23 @@ public class SingleMotorTestRobot extends TimedRobot {
     
     @Override
     public void teleopPeriodic() {
-        // Button mapping
-        if (controller.getRawButtonPressed(1)) { // A Button
+        // PS4 Button mapping
+        if (controller.getRawButtonPressed(2)) { // Cross (X)
             currentMode = MotorMode.INTAKE;
             System.out.println(">>> INTAKE MODE - Running at " + intakeSpeed);
         }
         
-        if (controller.getRawButtonPressed(2)) { // B Button
+        if (controller.getRawButtonPressed(3)) { // Circle (O)
             currentMode = MotorMode.OUTTAKE_1;
             System.out.println(">>> OUTTAKE 1 MODE - Running at " + outtake1Speed);
         }
         
-        if (controller.getRawButtonPressed(3)) { // X Button
+        if (controller.getRawButtonPressed(1)) { // Square
             currentMode = MotorMode.OUTTAKE_2;
             System.out.println(">>> OUTTAKE 2 MODE - Running at " + outtake2Speed);
         }
         
-        if (controller.getRawButtonPressed(4)) { // Y Button
+        if (controller.getRawButtonPressed(4)) { // Triangle
             currentMode = MotorMode.STOPPED;
             System.out.println(">>> STOPPED");
         }
