@@ -14,8 +14,14 @@ import com.ctre.phoenix6.controls.DutyCycleOut;
  * - Two different outtake speeds
  * 
  * This helps test your controller mapping before you have all motors installed.
+ * 
+ * MOTOR CAN ID CONFIGURATION:
+ * - Change MOTOR_CAN_ID below to match your motor (0 or 1)
  */
 public class SingleMotorTestRobot extends TimedRobot {
+    
+    // *** CONFIGURE THIS: Set to your motor's CAN ID (0 or 1) ***
+    private static final int MOTOR_CAN_ID = 0;  // Change to 1 if testing the other motor
     
     // Single motor for testing
     private TalonFX testMotor;
@@ -58,10 +64,22 @@ public class SingleMotorTestRobot extends TimedRobot {
         System.out.println("  - Using PS4 controller mapping");
         System.out.println("========================================");
         
-        // Initialize the test motor (using intake motor ID by default)
-        testMotor = new TalonFX(Constants.MotorIDs.INTAKE_MOTOR);
+        // Initialize the test motor with correct CAN ID
+        testMotor = new TalonFX(MOTOR_CAN_ID);
         
-        System.out.println("Motor initialized on CAN ID: " + Constants.MotorIDs.INTAKE_MOTOR);
+        System.out.println("Motor initialized on CAN ID: " + MOTOR_CAN_ID);
+        
+        // Check motor status
+        try {
+            double temp = testMotor.getDeviceTemp().getValueAsDouble();
+            System.out.println("✅ Motor detected! Temperature: " + temp + "°C");
+            System.out.println("Firmware version: " + testMotor.getVersion().getValue());
+        } catch (Exception e) {
+            System.out.println("⚠️  WARNING: Could not read motor status!");
+            System.out.println("Check: 1) Motor is powered, 2) CAN ID is correct, 3) CAN wiring");
+            System.out.println("Error: " + e.getMessage());
+        }
+        
         System.out.println("Ready to test!");
     }
     
@@ -114,6 +132,14 @@ public class SingleMotorTestRobot extends TimedRobot {
         }
         
         testMotor.setControl(new DutyCycleOut(motorSpeed));
+        
+        // Debug output every ~1 second
+        if (Math.random() < 0.02) {
+            System.out.println("[DEBUG] Mode: " + currentMode + 
+                             " | Speed: " + motorSpeed +
+                             " | Temp: " + testMotor.getDeviceTemp().getValueAsDouble() + "°C" +
+                             " | Current: " + testMotor.getSupplyCurrent().getValueAsDouble() + "A");
+        }
     }
     
     /**

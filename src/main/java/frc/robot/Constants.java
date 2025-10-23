@@ -5,6 +5,11 @@ import edu.wpi.first.wpilibj.util.Color;
 public final class Constants {
     
     public static final class MotorIDs {
+        // Actual motor CAN IDs currently installed
+        public static final int TEST_MOTOR_1 = 0;  // First test motor
+        public static final int TEST_MOTOR_2 = 1;  // Second test motor
+        
+        // Future motor IDs (when you get more motors)
         public static final int DRIVE_LEFT = 1;
         public static final int DRIVE_RIGHT = 2;
         public static final int INTAKE_MOTOR = 3;
