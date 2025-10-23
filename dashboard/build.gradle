@@ -32,6 +32,11 @@ dependencies {
     implementation 'edu.wpi.first.ntcore:ntcore-java:2025.3.2'
     implementation 'edu.wpi.first.wpiutil:wpiutil-java:2025.3.2'
     
+    // Jackson JSON - Required by NetworkTables for JSON serialization
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.15.2'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.15.2'
+    
     // JavaFX dependencies (managed by plugin)
     
     // Logging
