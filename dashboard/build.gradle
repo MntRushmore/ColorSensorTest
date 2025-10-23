@@ -27,37 +27,21 @@ repositories {
     }
 }
 
-// Configuration for native libraries
-configurations {
-    nativeLibs
-}
-
 dependencies {
     // WPILib NetworkTables for robot communication
     implementation 'edu.wpi.first.ntcore:ntcore-java:2025.3.2'
     implementation 'edu.wpi.first.wpiutil:wpiutil-java:2025.3.2'
     
-    // NetworkTables native libraries for all platforms
-    nativeLibs 'edu.wpi.first.ntcore:ntcore-jni:2025.3.2:osxuniversal'
-    nativeLibs 'edu.wpi.first.ntcore:ntcore-jni:2025.3.2:linuxx86-64'
-    nativeLibs 'edu.wpi.first.ntcore:ntcore-jni:2025.3.2:linuxarm64'
-    nativeLibs 'edu.wpi.first.ntcore:ntcore-jni:2025.3.2:windowsx86-64'
+    // NetworkTables native libraries - WPILib will extract these from classpath resources
+    implementation group: 'edu.wpi.first.ntcore', name: 'ntcore-jni', version: '2025.3.2', classifier: 'osxuniversal'
+    implementation group: 'edu.wpi.first.ntcore', name: 'ntcore-jni', version: '2025.3.2', classifier: 'linuxx86-64'
+    implementation group: 'edu.wpi.first.ntcore', name: 'ntcore-jni', version: '2025.3.2', classifier: 'linuxarm64'
+    implementation group: 'edu.wpi.first.ntcore', name: 'ntcore-jni', version: '2025.3.2', classifier: 'windowsx86-64'
     
-    nativeLibs 'edu.wpi.first.wpiutil:wpiutil-jni:2025.3.2:osxuniversal'
-    nativeLibs 'edu.wpi.first.wpiutil:wpiutil-jni:2025.3.2:linuxx86-64'
-    nativeLibs 'edu.wpi.first.wpiutil:wpiutil-jni:2025.3.2:linuxarm64'
-    nativeLibs 'edu.wpi.first.wpiutil:wpiutil-jni:2025.3.2:windowsx86-64'
-    
-    // Also add to runtime classpath
-    runtimeOnly 'edu.wpi.first.ntcore:ntcore-jni:2025.3.2:osxuniversal'
-    runtimeOnly 'edu.wpi.first.ntcore:ntcore-jni:2025.3.2:linuxx86-64'
-    runtimeOnly 'edu.wpi.first.ntcore:ntcore-jni:2025.3.2:linuxarm64'
-    runtimeOnly 'edu.wpi.first.ntcore:ntcore-jni:2025.3.2:windowsx86-64'
-    
-    runtimeOnly 'edu.wpi.first.wpiutil:wpiutil-jni:2025.3.2:osxuniversal'
-    runtimeOnly 'edu.wpi.first.wpiutil:wpiutil-jni:2025.3.2:linuxx86-64'
-    runtimeOnly 'edu.wpi.first.wpiutil:wpiutil-jni:2025.3.2:linuxarm64'
-    runtimeOnly 'edu.wpi.first.wpiutil:wpiutil-jni:2025.3.2:windowsx86-64'
+    implementation group: 'edu.wpi.first.wpiutil', name: 'wpiutil-jni', version: '2025.3.2', classifier: 'osxuniversal'
+    implementation group: 'edu.wpi.first.wpiutil', name: 'wpiutil-jni', version: '2025.3.2', classifier: 'linuxx86-64'
+    implementation group: 'edu.wpi.first.wpiutil', name: 'wpiutil-jni', version: '2025.3.2', classifier: 'linuxarm64'
+    implementation group: 'edu.wpi.first.wpiutil', name: 'wpiutil-jni', version: '2025.3.2', classifier: 'windowsx86-64'
     
     // Jackson JSON - Required by NetworkTables for JSON serialization
     implementation 'com.fasterxml.jackson.core:jackson-core:2.15.2'
@@ -79,43 +63,12 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
-// Task to extract native libraries from JNI JARs
-task extractNatives {
-    outputs.dir("${buildDir}/natives")
-    doLast {
-        def nativesDir = file("${buildDir}/natives")
-        nativesDir.mkdirs()
-        
-        configurations.nativeLibs.files.findAll { it.name.endsWith('.jar') }.each { file ->
-            copy {
-                from zipTree(file)
-                into nativesDir
-                include 'osx/**/*.dylib'      // macOS with directory structure
-                include 'linux/**/*.so'       // Linux with directory structure
-                include 'windows/**/*.dll'    // Windows with directory structure
-                include '**/*.hash'           // Include hash files too
-                includeEmptyDirs = false
-            }
-        }
-    }
-}
-
 // Run task configuration
 run {
-    dependsOn extractNatives
-    
-    // Add natives directory to classpath so WPILib RuntimeLoader can find libraries
-    classpath += files("${buildDir}/natives")
-    
-    // Add VM options for JavaFX and native library path
+    // Add VM options for JavaFX
     jvmArgs = [
-        '--add-opens', 'javafx.graphics/com.sun.javafx.application=ALL-UNNAMED',
-        "-Djava.library.path=${buildDir}/natives"
+        '--add-opens', 'javafx.graphics/com.sun.javafx.application=ALL-UNNAMED'
     ]
-    
-    // Set system properties for WPILib RuntimeLoader
-    systemProperty 'edu.wpi.first.runtime.extractOnStatic', 'false'
-    systemProperty 'wpiutil.loadLibrary', 'false'
 }
 
 // Create executable jar
