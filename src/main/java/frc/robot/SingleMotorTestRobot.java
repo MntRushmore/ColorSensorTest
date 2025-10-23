@@ -62,6 +62,17 @@ public class SingleMotorTestRobot extends TimedRobot {
         testMotor = new TalonFX(Constants.MotorIDs.INTAKE_MOTOR);
         
         System.out.println("Motor initialized on CAN ID: " + Constants.MotorIDs.INTAKE_MOTOR);
+        
+        // Check motor status
+        try {
+            double temp = testMotor.getDeviceTemp().getValueAsDouble();
+            System.out.println("Motor detected! Temperature: " + temp + "C");
+            System.out.println("Motor firmware version: " + testMotor.getVersion().getValue());
+        } catch (Exception e) {
+            System.out.println("⚠️  WARNING: Could not read motor status - check CAN connection!");
+            System.out.println("Error: " + e.getMessage());
+        }
+        
         System.out.println("Ready to test!");
     }
     
@@ -114,6 +125,14 @@ public class SingleMotorTestRobot extends TimedRobot {
         }
         
         testMotor.setControl(new DutyCycleOut(motorSpeed));
+        
+        // Debug output every 50 cycles (~1 second)
+        if (Math.random() < 0.02) {
+            System.out.println("[DEBUG] Current Mode: " + currentMode + 
+                             " | Motor Speed: " + motorSpeed +
+                             " | Motor Temp: " + testMotor.getDeviceTemp().getValueAsDouble() + "C" +
+                             " | Motor Current: " + testMotor.getSupplyCurrent().getValueAsDouble() + "A");
+        }
     }
     
     /**
