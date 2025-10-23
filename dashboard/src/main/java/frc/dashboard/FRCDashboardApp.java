@@ -39,6 +39,16 @@ public class FRCDashboardApp extends Application {
      * Application entry point
      */
     public static void main(String[] args) {
+        // Load WPILib native libraries BEFORE any NetworkTables usage
+        try {
+            System.out.println("Pre-loading WPILib native libraries...");
+            JNILoader.loadLibraries();
+        } catch (Exception e) {
+            System.err.println("CRITICAL: Failed to load native libraries!");
+            e.printStackTrace();
+            System.exit(1);
+        }
+        
         launch(args);
     }
     
