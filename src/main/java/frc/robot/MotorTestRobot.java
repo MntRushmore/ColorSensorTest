@@ -113,11 +113,11 @@ public class MotorTestRobot extends TimedRobot {
         
         SmartDashboard.putString("Test Mode", currentMode.toString());
         SmartDashboard.putNumber("Test Speed", testSpeed);
-        SmartDashboard.putNumber("Drive Left Current", driveLeft.getSupplyCurrent().getValue());
-        SmartDashboard.putNumber("Drive Right Current", driveRight.getSupplyCurrent().getValue());
-        SmartDashboard.putNumber("Intake Current", intakeMotor.getSupplyCurrent().getValue());
-        SmartDashboard.putNumber("Shooter Current", shooterMotor.getSupplyCurrent().getValue());
-        SmartDashboard.putNumber("Reject Current", rejectMotor.getSupplyCurrent().getValue());
+        SmartDashboard.putNumber("Drive Left Current", driveLeft.getSupplyCurrent().getValueAsDouble());
+        SmartDashboard.putNumber("Drive Right Current", driveRight.getSupplyCurrent().getValueAsDouble());
+        SmartDashboard.putNumber("Intake Current", intakeMotor.getSupplyCurrent().getValueAsDouble());
+        SmartDashboard.putNumber("Shooter Current", shooterMotor.getSupplyCurrent().getValueAsDouble());
+        SmartDashboard.putNumber("Reject Current", rejectMotor.getSupplyCurrent().getValueAsDouble());
     }
     
     @Override
