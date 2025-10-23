@@ -86,17 +86,15 @@ task extractNatives {
         def nativesDir = file("${buildDir}/natives")
         nativesDir.mkdirs()
         
-        configurations.nativeLibs.files.each { file ->
-            if (file.name.endsWith('.jar')) {
-                copy {
-                    from zipTree(file)
-                    into nativesDir
-                    include 'osx/**/*.dylib'      // macOS with directory structure
-                    include 'linux/**/*.so'       // Linux with directory structure
-                    include 'windows/**/*.dll'    // Windows with directory structure
-                    include '**/*.hash'           // Include hash files too
-                    includeEmptyDirs = false
-                }
+        configurations.nativeLibs.files.findAll { it.name.endsWith('.jar') }.each { file ->
+            copy {
+                from zipTree(file)
+                into nativesDir
+                include 'osx/**/*.dylib'      // macOS with directory structure
+                include 'linux/**/*.so'       // Linux with directory structure
+                include 'windows/**/*.dll'    // Windows with directory structure
+                include '**/*.hash'           // Include hash files too
+                includeEmptyDirs = false
             }
         }
     }
