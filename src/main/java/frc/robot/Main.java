@@ -14,16 +14,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 public final class Main {
   private Main() {}
 
-  /**
-   * Main initialization function. Do not perform any initialization here.
-   *
-   * <p>If you change your main robot class, change the parameter type.
-   * 
-   * WASD MOTOR CONTROL:
-   * - Kraken X50 on CAN ID 1
-   * - WASD keys or Xbox controller buttons
-   */
   public static void main(String... args) {
-    RobotBase.startRobot(WASDMotorControl::new);
+    RobotBase.startRobot(SimpleMotor::new);
   }
 }
