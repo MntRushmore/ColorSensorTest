@@ -20,16 +20,18 @@ public final class Main {
    * <p>If you change your main robot class, change the parameter type.
    * 
    * Available Robot Classes:
-   * - SingleMotorTestRobot::new - Test with ONE motor, different speeds per button
+   * - KeyboardMotorTest::new - KEYBOARD CONTROLS (number keys 1-4) - CURRENTLY ACTIVE
+   * - SingleMotorTestRobot::new - Test with ONE motor, PS4 controller
    * - MotorTestRobot::new - Test all motors individually
    * - ColorSensorTestRobot::new - Test color sensor
    * - Robot::new - Full ball sorting system
    */
   public static void main(String... args) {
-    // Single motor testing mode - CURRENTLY ACTIVE
-    RobotBase.startRobot(SingleMotorTestRobot::new);
+    // Keyboard control mode - CURRENTLY ACTIVE
+    RobotBase.startRobot(KeyboardMotorTest::new);
     
     // Uncomment below for other modes:
+    // RobotBase.startRobot(SingleMotorTestRobot::new);
     // RobotBase.startRobot(MotorTestRobot::new);
     // RobotBase.startRobot(ColorSensorTestRobot::new);
     // RobotBase.startRobot(Robot::new);
