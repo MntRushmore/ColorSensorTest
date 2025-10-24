@@ -19,11 +19,11 @@ public final class Main {
    *
    * <p>If you change your main robot class, change the parameter type.
    * 
-   * KEYBOARD MOTOR TEST:
-   * - Use number keys 1-4 to control motor
-   * - Simple and direct control
+   * WASD MOTOR CONTROL:
+   * - Kraken X50 on CAN ID 1
+   * - WASD keys or Xbox controller buttons
    */
   public static void main(String... args) {
-    RobotBase.startRobot(KeyboardMotorTest::new);
+    RobotBase.startRobot(WASDMotorControl::new);
   }
 }
