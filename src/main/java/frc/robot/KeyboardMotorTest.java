@@ -25,6 +25,7 @@ public class KeyboardMotorTest extends TimedRobot {
     private static final int MOTOR_CAN_ID = 0;
     
     private TalonFX testMotor;
+    private edu.wpi.first.wpilibj.Joystick keyboard;  // Create ONCE, not every loop!
     
     private enum MotorMode {
         STOPPED,
@@ -58,8 +59,10 @@ public class KeyboardMotorTest extends TimedRobot {
         System.out.println("========================================");
         
         testMotor = new TalonFX(MOTOR_CAN_ID);
+        keyboard = new edu.wpi.first.wpilibj.Joystick(0);  // Initialize keyboard joystick
         
         System.out.println("Motor initialized on CAN ID: " + MOTOR_CAN_ID);
+        System.out.println("Keyboard/Joystick initialized on port 0");
         
         try {
             double temp = testMotor.getDeviceTemp().getValueAsDouble();
@@ -75,10 +78,6 @@ public class KeyboardMotorTest extends TimedRobot {
     @Override
     public void teleopPeriodic() {
         loopCounter++;
-        
-        // Read keyboard as joystick (buttons 1-4)
-        // In Driver Station, keyboard keys map to joystick buttons
-        edu.wpi.first.wpilibj.Joystick keyboard = new edu.wpi.first.wpilibj.Joystick(0);
         
         double motorSpeed = 0.0;
         String status = "STOPPED";

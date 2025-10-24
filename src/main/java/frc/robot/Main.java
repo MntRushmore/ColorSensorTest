@@ -19,21 +19,11 @@ public final class Main {
    *
    * <p>If you change your main robot class, change the parameter type.
    * 
-   * Available Robot Classes:
-   * - KeyboardMotorTest::new - KEYBOARD CONTROLS (number keys 1-4) - CURRENTLY ACTIVE
-   * - SingleMotorTestRobot::new - Test with ONE motor, PS4 controller
-   * - MotorTestRobot::new - Test all motors individually
-   * - ColorSensorTestRobot::new - Test color sensor
-   * - Robot::new - Full ball sorting system
+   * KEYBOARD MOTOR TEST:
+   * - Use number keys 1-4 to control motor
+   * - Simple and direct control
    */
   public static void main(String... args) {
-    // Keyboard control mode - CURRENTLY ACTIVE
     RobotBase.startRobot(KeyboardMotorTest::new);
-    
-    // Uncomment below for other modes:
-    // RobotBase.startRobot(SingleMotorTestRobot::new);
-    // RobotBase.startRobot(MotorTestRobot::new);
-    // RobotBase.startRobot(ColorSensorTestRobot::new);
-    // RobotBase.startRobot(Robot::new);
   }
 }
