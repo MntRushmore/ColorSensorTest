@@ -51,28 +51,24 @@ public class Robot extends TimedRobot {
             System.out.println("  Error: " + e.getMessage());
         }
 
-        // Only initialize color sensor on real robot
-        if (RobotBase.isReal()) {
-            System.out.println("\nAttempting to initialize color sensor...");
-            System.out.println("Using I2C port: " + i2cPort);
-            try {
-                colorSensor = new ColorSensorV3(i2cPort);
-                System.out.println("✓ Color sensor object created");
-                
-                // Try reading immediately to verify it works
-                var testColor = colorSensor.getColor();
-                System.out.println("✓ Color sensor reading test successful!");
-                System.out.printf("  Initial reading: R=%.3f G=%.3f B=%.3f%n", 
-                    testColor.red, testColor.green, testColor.blue);
-            } catch (Exception e) {
-                System.out.println("✗ WARNING: Color sensor initialization failed!");
-                System.out.println("  Error type: " + e.getClass().getName());
-                System.out.println("  Error message: " + e.getMessage());
-                e.printStackTrace();
-                colorSensor = null;
-            }
-        } else {
-            System.out.println("Simulation mode - Color sensor disabled");
+        // Initialize color sensor (works in both real robot and hardware sim)
+        System.out.println("\nAttempting to initialize color sensor...");
+        System.out.println("Using I2C port: " + i2cPort);
+        try {
+            colorSensor = new ColorSensorV3(i2cPort);
+            System.out.println("✓ Color sensor object created");
+            
+            // Try reading immediately to verify it works
+            var testColor = colorSensor.getColor();
+            System.out.println("✓ Color sensor reading test successful!");
+            System.out.printf("  Initial reading: R=%.3f G=%.3f B=%.3f%n", 
+                testColor.red, testColor.green, testColor.blue);
+        } catch (Exception e) {
+            System.out.println("✗ WARNING: Color sensor initialization failed!");
+            System.out.println("  Error type: " + e.getClass().getName());
+            System.out.println("  Error message: " + e.getMessage());
+            e.printStackTrace();
+            colorSensor = null;
         }
         
         System.out.println("\n=== INITIALIZATION COMPLETE ===\n");
@@ -84,60 +80,52 @@ public class Robot extends TimedRobot {
         // Debug: Print status every 2 seconds
         double currentTime = Timer.getFPGATimestamp();
         
-        // Only read color sensor on real robot
-        if (RobotBase.isReal()) {
-            if (colorSensor == null) {
-                // Print reminder that sensor isn't initialized
-                if (currentTime - lastPrintTime >= 2.0) {
-                    lastPrintTime = currentTime;
-                    System.out.println("⚠ Color sensor is NULL - not initialized properly");
-                }
-                return;
-            }
-            
-            // Only print every PRINT_INTERVAL seconds to avoid spam
-            if (currentTime - lastPrintTime >= PRINT_INTERVAL) {
-                lastPrintTime = currentTime;
-                
-                try {
-                    var color = colorSensor.getColor();
-                    int proximity = colorSensor.getProximity();
-                    
-                    // Determine dominant color
-                    String detectedColor = "Unknown";
-                    double maxValue = Math.max(color.red, Math.max(color.green, color.blue));
-                    
-                    if (maxValue < 0.2) {
-                        detectedColor = "Black/Dark";
-                    } else if (color.red > color.green && color.red > color.blue) {
-                        if (color.green > 0.3 && color.blue < 0.3) {
-                            detectedColor = "Yellow";
-                        } else {
-                            detectedColor = "Red";
-                        }
-                    } else if (color.green > color.red && color.green > color.blue) {
-                        detectedColor = "Green";
-                    } else if (color.blue > color.red && color.blue > color.green) {
-                        detectedColor = "Blue";
-                    } else if (color.red > 0.4 && color.green > 0.4 && color.blue > 0.4) {
-                        detectedColor = "White";
-                    }
-                    
-                    System.out.println("========================================");
-                    System.out.printf("COLOR SENSOR: %s%n", detectedColor);
-                    System.out.printf("R=%.3f  G=%.3f  B=%.3f  Proximity=%d%n",
-                            color.red, color.green, color.blue, proximity);
-                    System.out.println("========================================");
-                } catch (Exception e) {
-                    System.out.println("✗ ERROR reading color sensor: " + e.getMessage());
-                    e.printStackTrace();
-                }
-            }
-        } else {
-            // In simulation
+        // Read color sensor if available
+        if (colorSensor == null) {
+            // Print reminder that sensor isn't initialized
             if (currentTime - lastPrintTime >= 2.0) {
                 lastPrintTime = currentTime;
-                System.out.println("Running in simulation - color sensor disabled");
+                System.out.println("⚠ Color sensor is NULL - not initialized properly");
+            }
+            return;
+        }
+        
+        // Only print every PRINT_INTERVAL seconds to avoid spam
+        if (currentTime - lastPrintTime >= PRINT_INTERVAL) {
+            lastPrintTime = currentTime;
+            
+            try {
+                var color = colorSensor.getColor();
+                int proximity = colorSensor.getProximity();
+                
+                // Determine dominant color
+                String detectedColor = "Unknown";
+                double maxValue = Math.max(color.red, Math.max(color.green, color.blue));
+                
+                if (maxValue < 0.2) {
+                    detectedColor = "Black/Dark";
+                } else if (color.red > color.green && color.red > color.blue) {
+                    if (color.green > 0.3 && color.blue < 0.3) {
+                        detectedColor = "Yellow";
+                    } else {
+                        detectedColor = "Red";
+                    }
+                } else if (color.green > color.red && color.green > color.blue) {
+                    detectedColor = "Green";
+                } else if (color.blue > color.red && color.blue > color.green) {
+                    detectedColor = "Blue";
+                } else if (color.red > 0.4 && color.green > 0.4 && color.blue > 0.4) {
+                    detectedColor = "White";
+                }
+                
+                System.out.println("========================================");
+                System.out.printf("COLOR SENSOR: %s%n", detectedColor);
+                System.out.printf("R=%.3f  G=%.3f  B=%.3f  Proximity=%d%n",
+                        color.red, color.green, color.blue, proximity);
+                System.out.println("========================================");
+            } catch (Exception e) {
+                System.out.println("✗ ERROR reading color sensor: " + e.getMessage());
+                e.printStackTrace();
             }
         }
     }
