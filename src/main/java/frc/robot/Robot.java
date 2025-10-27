@@ -13,7 +13,8 @@ import com.revrobotics.ColorSensorV3;
 public class Robot extends TimedRobot {
 
     // --- Color Sensor ---
-    private final I2C.Port i2cPort = I2C.Port.kOnboard; // use kMXP if on MXP
+    // Try kMXP if kOnboard doesn't work
+    private final I2C.Port i2cPort = I2C.Port.kOnboard; // Change to kMXP if sensor is on MXP port
     private ColorSensorV3 colorSensor;
     private double lastPrintTime = 0;
     private static final double PRINT_INTERVAL = 0.5; // Print every 0.5 seconds
@@ -58,11 +59,28 @@ public class Robot extends TimedRobot {
             colorSensor = new ColorSensorV3(i2cPort);
             System.out.println("✓ Color sensor object created");
             
+            // Check if sensor is connected
+            if (!colorSensor.isConnected()) {
+                System.out.println("✗ WARNING: Sensor reports NOT CONNECTED!");
+                System.out.println("  Check I2C cable connection");
+            } else {
+                System.out.println("✓ Sensor reports CONNECTED");
+            }
+            
             // Try reading immediately to verify it works
             var testColor = colorSensor.getColor();
-            System.out.println("✓ Color sensor reading test successful!");
+            System.out.println("✓ Color sensor reading test:");
             System.out.printf("  Initial reading: R=%.3f G=%.3f B=%.3f%n", 
                 testColor.red, testColor.green, testColor.blue);
+                
+            if (Double.isNaN(testColor.red)) {
+                System.out.println("✗ WARNING: Getting NaN values - I2C communication failure!");
+                System.out.println("  Possible causes:");
+                System.out.println("  - Loose I2C cable connection");
+                System.out.println("  - Faulty cable");
+                System.out.println("  - Wrong I2C port (try kMXP instead)");
+                System.out.println("  - Sensor hardware issue");
+            }
         } catch (Exception e) {
             System.out.println("✗ WARNING: Color sensor initialization failed!");
             System.out.println("  Error type: " + e.getClass().getName());
