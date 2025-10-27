@@ -3,6 +3,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.Timer;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.sim.TalonFXSimState;
@@ -14,6 +15,8 @@ public class Robot extends TimedRobot {
     // --- Color Sensor ---
     private final I2C.Port i2cPort = I2C.Port.kOnboard; // use kMXP if on MXP
     private ColorSensorV3 colorSensor;
+    private double lastPrintTime = 0;
+    private static final double PRINT_INTERVAL = 0.5; // Print every 0.5 seconds
 
     // --- Motor Control ---
     private TalonFX motor;
@@ -60,31 +63,45 @@ public class Robot extends TimedRobot {
     public void robotPeriodic() {
         // Only read color sensor on real robot
         if (RobotBase.isReal() && colorSensor != null) {
-            var color = colorSensor.getColor();
-            int proximity = colorSensor.getProximity();
+            double currentTime = Timer.getFPGATimestamp();
             
-            // Determine dominant color
-            String detectedColor = "Unknown";
-            double maxValue = Math.max(color.red, Math.max(color.green, color.blue));
-            
-            if (maxValue < 0.2) {
-                detectedColor = "Black/Dark";
-            } else if (color.red > color.green && color.red > color.blue) {
-                if (color.green > 0.3 && color.blue < 0.3) {
-                    detectedColor = "Yellow";
-                } else {
-                    detectedColor = "Red";
+            // Only print every PRINT_INTERVAL seconds to avoid spam
+            if (currentTime - lastPrintTime >= PRINT_INTERVAL) {
+                lastPrintTime = currentTime;
+                
+                try {
+                    var color = colorSensor.getColor();
+                    int proximity = colorSensor.getProximity();
+                    
+                    // Determine dominant color
+                    String detectedColor = "Unknown";
+                    double maxValue = Math.max(color.red, Math.max(color.green, color.blue));
+                    
+                    if (maxValue < 0.2) {
+                        detectedColor = "Black/Dark";
+                    } else if (color.red > color.green && color.red > color.blue) {
+                        if (color.green > 0.3 && color.blue < 0.3) {
+                            detectedColor = "Yellow";
+                        } else {
+                            detectedColor = "Red";
+                        }
+                    } else if (color.green > color.red && color.green > color.blue) {
+                        detectedColor = "Green";
+                    } else if (color.blue > color.red && color.blue > color.green) {
+                        detectedColor = "Blue";
+                    } else if (color.red > 0.4 && color.green > 0.4 && color.blue > 0.4) {
+                        detectedColor = "White";
+                    }
+                    
+                    System.out.println("========================================");
+                    System.out.printf("COLOR SENSOR: %s%n", detectedColor);
+                    System.out.printf("R=%.3f  G=%.3f  B=%.3f  Proximity=%d%n",
+                            color.red, color.green, color.blue, proximity);
+                    System.out.println("========================================");
+                } catch (Exception e) {
+                    System.out.println("ERROR reading color sensor: " + e.getMessage());
                 }
-            } else if (color.green > color.red && color.green > color.blue) {
-                detectedColor = "Green";
-            } else if (color.blue > color.red && color.blue > color.green) {
-                detectedColor = "Blue";
-            } else if (color.red > 0.4 && color.green > 0.4 && color.blue > 0.4) {
-                detectedColor = "White";
             }
-            
-            System.out.printf("Color: %s | R=%.3f  G=%.3f  B=%.3f  Proximity=%d%n",
-                    detectedColor, color.red, color.green, color.blue, proximity);
         }
     }
 
