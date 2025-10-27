@@ -32,38 +32,68 @@ public class Robot extends TimedRobot {
         System.out.println("Button 1=0.7 | Button 2=0.8 | Button 3=0.75 | Button 4=Stop");
         System.out.println("=========================================\n");
 
+        // Check if we're on real robot or simulation
+        if (RobotBase.isReal()) {
+            System.out.println("*** RUNNING ON REAL ROBOT ***");
+        } else {
+            System.out.println("*** RUNNING IN SIMULATION ***");
+        }
+
         // Try to initialize motor, but don't crash if it fails
         try {
             motor = new TalonFX(1);  // CAN ID 1
             keyboard = new Joystick(0);  // Keyboard shows as Joystick 0
             dutyCycleControl = new DutyCycleOut(0.0);
             motorSim = motor.getSimState();
-            System.out.println("Motor initialized successfully");
+            System.out.println("✓ Motor initialized successfully");
         } catch (Exception e) {
-            System.out.println("WARNING: Motor not connected - motor control disabled");
-            System.out.println("Error: " + e.getMessage());
+            System.out.println("✗ WARNING: Motor not connected - motor control disabled");
+            System.out.println("  Error: " + e.getMessage());
         }
 
         // Only initialize color sensor on real robot
         if (RobotBase.isReal()) {
+            System.out.println("\nAttempting to initialize color sensor...");
+            System.out.println("Using I2C port: " + i2cPort);
             try {
                 colorSensor = new ColorSensorV3(i2cPort);
-                System.out.println("Color sensor initialized");
+                System.out.println("✓ Color sensor object created");
+                
+                // Try reading immediately to verify it works
+                var testColor = colorSensor.getColor();
+                System.out.println("✓ Color sensor reading test successful!");
+                System.out.printf("  Initial reading: R=%.3f G=%.3f B=%.3f%n", 
+                    testColor.red, testColor.green, testColor.blue);
             } catch (Exception e) {
-                System.out.println("WARNING: Color sensor not connected");
-                System.out.println("Error: " + e.getMessage());
+                System.out.println("✗ WARNING: Color sensor initialization failed!");
+                System.out.println("  Error type: " + e.getClass().getName());
+                System.out.println("  Error message: " + e.getMessage());
+                e.printStackTrace();
+                colorSensor = null;
             }
         } else {
             System.out.println("Simulation mode - Color sensor disabled");
         }
+        
+        System.out.println("\n=== INITIALIZATION COMPLETE ===\n");
     }
 
     // --- Runs every robot loop ---
     @Override
     public void robotPeriodic() {
+        // Debug: Print status every 2 seconds
+        double currentTime = Timer.getFPGATimestamp();
+        
         // Only read color sensor on real robot
-        if (RobotBase.isReal() && colorSensor != null) {
-            double currentTime = Timer.getFPGATimestamp();
+        if (RobotBase.isReal()) {
+            if (colorSensor == null) {
+                // Print reminder that sensor isn't initialized
+                if (currentTime - lastPrintTime >= 2.0) {
+                    lastPrintTime = currentTime;
+                    System.out.println("⚠ Color sensor is NULL - not initialized properly");
+                }
+                return;
+            }
             
             // Only print every PRINT_INTERVAL seconds to avoid spam
             if (currentTime - lastPrintTime >= PRINT_INTERVAL) {
@@ -99,8 +129,15 @@ public class Robot extends TimedRobot {
                             color.red, color.green, color.blue, proximity);
                     System.out.println("========================================");
                 } catch (Exception e) {
-                    System.out.println("ERROR reading color sensor: " + e.getMessage());
+                    System.out.println("✗ ERROR reading color sensor: " + e.getMessage());
+                    e.printStackTrace();
                 }
+            }
+        } else {
+            // In simulation
+            if (currentTime - lastPrintTime >= 2.0) {
+                lastPrintTime = currentTime;
+                System.out.println("Running in simulation - color sensor disabled");
             }
         }
     }
