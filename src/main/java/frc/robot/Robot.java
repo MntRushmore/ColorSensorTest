@@ -29,17 +29,27 @@ public class Robot extends TimedRobot {
         System.out.println("Button 1=0.7 | Button 2=0.8 | Button 3=0.75 | Button 4=Stop");
         System.out.println("=========================================\n");
 
-        motor = new TalonFX(1);  // CAN ID 1
-        keyboard = new Joystick(0);  // Keyboard shows as Joystick 0
-        dutyCycleControl = new DutyCycleOut(0.0);
-
-        // Get simulation state for the motor
-        motorSim = motor.getSimState();
+        // Try to initialize motor, but don't crash if it fails
+        try {
+            motor = new TalonFX(1);  // CAN ID 1
+            keyboard = new Joystick(0);  // Keyboard shows as Joystick 0
+            dutyCycleControl = new DutyCycleOut(0.0);
+            motorSim = motor.getSimState();
+            System.out.println("Motor initialized successfully");
+        } catch (Exception e) {
+            System.out.println("WARNING: Motor not connected - motor control disabled");
+            System.out.println("Error: " + e.getMessage());
+        }
 
         // Only initialize color sensor on real robot
         if (RobotBase.isReal()) {
-            colorSensor = new ColorSensorV3(i2cPort);
-            System.out.println("Color sensor initialized");
+            try {
+                colorSensor = new ColorSensorV3(i2cPort);
+                System.out.println("Color sensor initialized");
+            } catch (Exception e) {
+                System.out.println("WARNING: Color sensor not connected");
+                System.out.println("Error: " + e.getMessage());
+            }
         } else {
             System.out.println("Simulation mode - Color sensor disabled");
         }
@@ -81,6 +91,11 @@ public class Robot extends TimedRobot {
     // --- Teleop motor control ---
     @Override
     public void teleopPeriodic() {
+        // Only control motor if it's connected
+        if (motor == null || keyboard == null) {
+            return;
+        }
+
         double speed = 0.0;
 
         if (keyboard.getRawButton(1)) {
@@ -104,20 +119,33 @@ public class Robot extends TimedRobot {
     // --- Disabled ---
     @Override
     public void disabledInit() {
-        dutyCycleControl.Output = 0.0;
-        motor.setControl(dutyCycleControl);
-        System.out.println("Robot disabled - Motor stopped");
+        // Only stop motor if it's connected
+        if (motor != null && dutyCycleControl != null) {
+            dutyCycleControl.Output = 0.0;
+            motor.setControl(dutyCycleControl);
+            System.out.println("Robot disabled - Motor stopped");
+        } else {
+            System.out.println("Robot disabled");
+        }
     }
 
     @Override
     public void disabledPeriodic() {
-        dutyCycleControl.Output = 0.0;
-        motor.setControl(dutyCycleControl);
+        // Only stop motor if it's connected
+        if (motor != null && dutyCycleControl != null) {
+            dutyCycleControl.Output = 0.0;
+            motor.setControl(dutyCycleControl);
+        }
     }
 
     // --- Simulation ---
     @Override
     public void simulationPeriodic() {
+        // Only simulate motor if it's connected
+        if (motorSim == null) {
+            return;
+        }
+
         // Update motor simulation
         motorSim.setSupplyVoltage(12.0);  // Simulated battery voltage
 
