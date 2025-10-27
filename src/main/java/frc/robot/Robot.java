@@ -2,6 +2,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.RobotBase;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.sim.TalonFXSimState;
@@ -12,7 +13,7 @@ public class Robot extends TimedRobot {
 
     // --- Color Sensor ---
     private final I2C.Port i2cPort = I2C.Port.kOnboard; // use kMXP if on MXP
-    private final ColorSensorV3 colorSensor = new ColorSensorV3(i2cPort);
+    private ColorSensorV3 colorSensor;
 
     // --- Motor Control ---
     private TalonFX motor;
@@ -34,15 +35,47 @@ public class Robot extends TimedRobot {
 
         // Get simulation state for the motor
         motorSim = motor.getSimState();
+
+        // Only initialize color sensor on real robot
+        if (RobotBase.isReal()) {
+            colorSensor = new ColorSensorV3(i2cPort);
+            System.out.println("Color sensor initialized");
+        } else {
+            System.out.println("Simulation mode - Color sensor disabled");
+        }
     }
 
     // --- Runs every robot loop ---
     @Override
     public void robotPeriodic() {
-        // Color sensor test
-        var color = colorSensor.getColor();
-        System.out.printf("R=%.3f  G=%.3f  B=%.3f%n",
-                color.red, color.green, color.blue);
+        // Only read color sensor on real robot
+        if (RobotBase.isReal() && colorSensor != null) {
+            var color = colorSensor.getColor();
+            int proximity = colorSensor.getProximity();
+            
+            // Determine dominant color
+            String detectedColor = "Unknown";
+            double maxValue = Math.max(color.red, Math.max(color.green, color.blue));
+            
+            if (maxValue < 0.2) {
+                detectedColor = "Black/Dark";
+            } else if (color.red > color.green && color.red > color.blue) {
+                if (color.green > 0.3 && color.blue < 0.3) {
+                    detectedColor = "Yellow";
+                } else {
+                    detectedColor = "Red";
+                }
+            } else if (color.green > color.red && color.green > color.blue) {
+                detectedColor = "Green";
+            } else if (color.blue > color.red && color.blue > color.green) {
+                detectedColor = "Blue";
+            } else if (color.red > 0.4 && color.green > 0.4 && color.blue > 0.4) {
+                detectedColor = "White";
+            }
+            
+            System.out.printf("Color: %s | R=%.3f  G=%.3f  B=%.3f  Proximity=%d%n",
+                    detectedColor, color.red, color.green, color.blue, proximity);
+        }
     }
 
     // --- Teleop motor control ---
