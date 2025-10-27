@@ -86,7 +86,7 @@ public class Robot extends TimedRobot {
         double appliedVoltage = motorSim.getMotorVoltage();
         double simulatedVelocity = appliedVoltage * 100.0;  // Simplified: 100 RPS per volt
         
-        motorSim.setRawRotorPosition(motorSim.getRawRotorPosition() + simulatedVelocity * 0.020);  // 20ms periodic
+        motorSim.addRotorPosition(simulatedVelocity * 0.020);  // 20ms periodic
         motorSim.setRotorVelocity(simulatedVelocity);
         
         // Optional: Print simulation data periodically
