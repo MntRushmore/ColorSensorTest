@@ -44,7 +44,7 @@ public void robotInit() {
 
     // Initialize motor on CANivore bus
     try {
-        motor = new TalonFX(0, "CANivore");  // CAN ID 1 on CANivore bus
+        motor = new TalonFX(1, "canivore");  // CAN ID 1 on CANivore bus
         dutyCycleControl = new DutyCycleOut(0.0);
         motorSim = motor.getSimState();
         System.out.println("✓ Motor initialized successfully on CANivore");
