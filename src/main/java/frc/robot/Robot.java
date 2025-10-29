@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.PS4Controller;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.sim.TalonFXSimState;
@@ -13,7 +14,6 @@ import com.revrobotics.ColorSensorV3;
 public class Robot extends TimedRobot {
 
     // --- Color Sensor ---
-    // Try kMXP if kOnboard doesn't work
     private final I2C.Port i2cPort = I2C.Port.kOnboard; // Change to kMXP if sensor is on MXP port
     private ColorSensorV3 colorSensor;
     private double lastPrintTime = 0;
@@ -21,126 +21,108 @@ public class Robot extends TimedRobot {
 
     // --- Motor Control ---
     private TalonFX motor;
-    private Joystick keyboard;
     private DutyCycleOut dutyCycleControl;
     private TalonFXSimState motorSim;
 
-    // --- Robot Initialization ---
+    // --- PS4 Controller ---
+    private PS4Controller controller;
+
     @Override
-    public void robotInit() {
-        System.out.println("\n\n=== SIMPLE MOTOR CONTROL - SIMULATION ===");
-        System.out.println("Motor CAN ID: 1");
-        System.out.println("Button 1=0.7 | Button 2=0.8 | Button 3=0.75 | Button 4=Stop");
-        System.out.println("=========================================\n");
+public void robotInit() {
+    System.out.println("RIOLOG TEST MESSAGE");
+    System.out.println("\n\n=== SIMPLE MOTOR CONTROL - SIMULATION ===");
+    System.out.println("Motor CAN ID: 1 on CANivore");
+    System.out.println("Cross=0.7 | Circle=0.8 | Square=0.75 | Triangle=Stop");
+    System.out.println("=========================================\n");
 
-        // Check if we're on real robot or simulation
-        if (RobotBase.isReal()) {
-            System.out.println("*** RUNNING ON REAL ROBOT ***");
-        } else {
-            System.out.println("*** RUNNING IN SIMULATION ***");
-        }
-
-        // Try to initialize motor, but don't crash if it fails
-        try {
-            motor = new TalonFX(1);  // CAN ID 1
-            keyboard = new Joystick(0);  // Keyboard shows as Joystick 0
-            dutyCycleControl = new DutyCycleOut(0.0);
-            motorSim = motor.getSimState();
-            System.out.println("✓ Motor initialized successfully");
-        } catch (Exception e) {
-            System.out.println("✗ WARNING: Motor not connected - motor control disabled");
-            System.out.println("  Error: " + e.getMessage());
-        }
-
-        // Initialize color sensor (works in both real robot and hardware sim)
-        System.out.println("\nAttempting to initialize color sensor...");
-        System.out.println("Using I2C port: " + i2cPort);
-        try {
-            colorSensor = new ColorSensorV3(i2cPort);
-            System.out.println("✓ Color sensor object created");
-            
-            // Check if sensor is connected
-            if (!colorSensor.isConnected()) {
-                System.out.println("✗ WARNING: Sensor reports NOT CONNECTED!");
-                System.out.println("  Check I2C cable connection");
-            } else {
-                System.out.println("✓ Sensor reports CONNECTED");
-            }
-            
-            // Try reading immediately to verify it works
-            var testColor = colorSensor.getColor();
-            System.out.println("✓ Color sensor reading test:");
-            System.out.printf("  Initial reading: R=%.3f G=%.3f B=%.3f%n", 
-                testColor.red, testColor.green, testColor.blue);
-                
-            if (Double.isNaN(testColor.red)) {
-                System.out.println("✗ WARNING: Getting NaN values - I2C communication failure!");
-                System.out.println("  Possible causes:");
-                System.out.println("  - Loose I2C cable connection");
-                System.out.println("  - Faulty cable");
-                System.out.println("  - Wrong I2C port (try kMXP instead)");
-                System.out.println("  - Sensor hardware issue");
-            }
-        } catch (Exception e) {
-            System.out.println("✗ WARNING: Color sensor initialization failed!");
-            System.out.println("  Error type: " + e.getClass().getName());
-            System.out.println("  Error message: " + e.getMessage());
-            e.printStackTrace();
-            colorSensor = null;
-        }
-        
-        System.out.println("\n=== INITIALIZATION COMPLETE ===\n");
+    // Check if we're on real robot or simulation
+    if (RobotBase.isReal()) {
+        System.out.println("*** RUNNING ON REAL ROBOT ***");
+    } else {
+        System.out.println("*** RUNNING IN SIMULATION ***");
     }
 
-    // --- Runs every robot loop ---
+    // Initialize motor on CANivore bus
+    try {
+        motor = new TalonFX(0, "CANivore");  // CAN ID 1 on CANivore bus
+        dutyCycleControl = new DutyCycleOut(0.0);
+        motorSim = motor.getSimState();
+        System.out.println("✓ Motor initialized successfully on CANivore");
+    } catch (Exception e) {
+        System.out.println("✗ WARNING: Motor not connected - motor control disabled");
+        System.out.println("  Error: " + e.getMessage());
+    }
+
+    // Initialize PS4 controller on USB port 0
+    controller = new PS4Controller(0); 
+    System.out.println("✓ PS4 controller initialized on USB port 0");
+
+    // Initialize color sensor
+    System.out.println("\nAttempting to initialize color sensor...");
+    System.out.println("Using I2C port: " + i2cPort);
+    try {
+        colorSensor = new ColorSensorV3(i2cPort);
+        System.out.println("✓ Color sensor object created");
+
+        if (!colorSensor.isConnected()) {
+            System.out.println("✗ WARNING: Sensor reports NOT CONNECTED!");
+        } else {
+            System.out.println("✓ Sensor reports CONNECTED");
+        }
+
+        var testColor = colorSensor.getColor();
+        System.out.printf("✓ Initial reading: R=%.3f G=%.3f B=%.3f%n", 
+                          testColor.red, testColor.green, testColor.blue);
+
+        if (Double.isNaN(testColor.red)) {
+            System.out.println("✗ WARNING: Getting NaN values - I2C communication failure!");
+        }
+    } catch (Exception e) {
+        System.out.println("✗ WARNING: Color sensor initialization failed!");
+        e.printStackTrace();
+        colorSensor = null;
+    }
+
+    System.out.println("\n=== INITIALIZATION COMPLETE ===\n");
+}
+
     @Override
     public void robotPeriodic() {
-        // Debug: Print status every 2 seconds
         double currentTime = Timer.getFPGATimestamp();
-        
-        // Read color sensor if available
+
         if (colorSensor == null) {
-            // Print reminder that sensor isn't initialized
             if (currentTime - lastPrintTime >= 2.0) {
                 lastPrintTime = currentTime;
                 System.out.println("⚠ Color sensor is NULL - not initialized properly");
             }
             return;
         }
-        
-        // Only print every PRINT_INTERVAL seconds to avoid spam
+
         if (currentTime - lastPrintTime >= PRINT_INTERVAL) {
             lastPrintTime = currentTime;
-            
+
             try {
                 var color = colorSensor.getColor();
                 int proximity = colorSensor.getProximity();
-                
-                // Determine dominant color
+
                 String detectedColor = "Unknown";
                 double maxValue = Math.max(color.red, Math.max(color.green, color.blue));
-                
+
                 if (maxValue < 0.2) {
                     detectedColor = "Black/Dark";
                 } else if (color.red > color.green && color.red > color.blue) {
-                    if (color.green > 0.3 && color.blue < 0.3) {
-                        detectedColor = "Yellow";
-                    } else {
-                        detectedColor = "Red";
-                    }
-                } else if (color.green > color.red && color.green > color.blue) {
-                    detectedColor = "Green";
-                } else if (color.blue > color.red && color.blue > color.green) {
-                    detectedColor = "Blue";
-                } else if (color.red > 0.4 && color.green > 0.4 && color.blue > 0.4) {
-                    detectedColor = "White";
-                }
-                
+                    if (color.green > 0.3 && color.blue < 0.3) detectedColor = "Yellow";
+                    else detectedColor = "Red";
+                } else if (color.green > color.red && color.green > color.blue) detectedColor = "Green";
+                else if (color.blue > color.red && color.blue > color.green) detectedColor = "Blue";
+                else if (color.red > 0.4 && color.green > 0.4 && color.blue > 0.4) detectedColor = "White";
+
                 System.out.println("========================================");
                 System.out.printf("COLOR SENSOR: %s%n", detectedColor);
                 System.out.printf("R=%.3f  G=%.3f  B=%.3f  Proximity=%d%n",
-                        color.red, color.green, color.blue, proximity);
+                                  color.red, color.green, color.blue, proximity);
                 System.out.println("========================================");
+                System.out.flush();
             } catch (Exception e) {
                 System.out.println("✗ ERROR reading color sensor: " + e.getMessage());
                 e.printStackTrace();
@@ -148,38 +130,32 @@ public class Robot extends TimedRobot {
         }
     }
 
-    // --- Teleop motor control ---
     @Override
     public void teleopPeriodic() {
-        // Only control motor if it's connected
-        if (motor == null || keyboard == null) {
-            return;
-        }
+        if (motor == null || controller == null) return;
 
         double speed = 0.0;
 
-        if (keyboard.getRawButton(1)) {
+        if (controller.getCrossButton()) {        // Cross = A
             speed = 0.7;
-            System.out.println("Button 1 pressed - Speed: 0.7");
-        } else if (keyboard.getRawButton(2)) {
+            System.out.println("Cross pressed - Speed: 0.7");
+        } else if (controller.getCircleButton()) { // Circle = B
             speed = 0.8;
-            System.out.println("Button 2 pressed - Speed: 0.8");
-        } else if (keyboard.getRawButton(3)) {
+            System.out.println("Circle pressed - Speed: 0.8");
+        } else if (controller.getSquareButton()) { // Square = X
             speed = 0.75;
-            System.out.println("Button 3 pressed - Speed: 0.75");
-        } else if (keyboard.getRawButton(4)) {
+            System.out.println("Square pressed - Speed: 0.75");
+        } else if (controller.getTriangleButton()) { // Triangle = Y
             speed = 0.0;
-            System.out.println("Button 4 pressed - STOP");
+            System.out.println("Triangle pressed - STOP");
         }
 
         dutyCycleControl.Output = speed;
         motor.setControl(dutyCycleControl);
     }
 
-    // --- Disabled ---
     @Override
     public void disabledInit() {
-        // Only stop motor if it's connected
         if (motor != null && dutyCycleControl != null) {
             dutyCycleControl.Output = 0.0;
             motor.setControl(dutyCycleControl);
@@ -191,28 +167,20 @@ public class Robot extends TimedRobot {
 
     @Override
     public void disabledPeriodic() {
-        // Only stop motor if it's connected
         if (motor != null && dutyCycleControl != null) {
             dutyCycleControl.Output = 0.0;
             motor.setControl(dutyCycleControl);
         }
     }
 
-    // --- Simulation ---
     @Override
     public void simulationPeriodic() {
-        // Only simulate motor if it's connected
-        if (motorSim == null) {
-            return;
-        }
+        if (motorSim == null) return;
 
-        // Update motor simulation
-        motorSim.setSupplyVoltage(12.0);  // Simulated battery voltage
-
+        motorSim.setSupplyVoltage(12.0);
         double appliedVoltage = motorSim.getMotorVoltage();
-        double simulatedVelocity = appliedVoltage * 100.0;  // Simplified model
-
-        motorSim.addRotorPosition(simulatedVelocity * 0.020);  // 20ms periodic
+        double simulatedVelocity = appliedVoltage * 100.0;
+        motorSim.addRotorPosition(simulatedVelocity * 0.020);
         motorSim.setRotorVelocity(simulatedVelocity);
 
         if (Math.abs(appliedVoltage) > 0.1) {
