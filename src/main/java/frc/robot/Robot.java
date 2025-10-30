@@ -26,12 +26,6 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotInit() {
-        System.out.println("RIOLOG TEST MESSAGE");
-        System.out.println("\n\n=== SIMPLE MOTOR CONTROL ===");
-        System.out.println("Motor CAN ID: 1 on CANivore");
-        System.out.println("Cross=0.7 | Circle=0.8 | Square=0.75 | Triangle=Stop");
-        System.out.println("=========================================\n");
-
         if (RobotBase.isReal()) {
             System.out.println("*** RUNNING ON REAL ROBOT ***");
         } else {
@@ -103,7 +97,7 @@ public class Robot extends TimedRobot {
 
         // Set motor speed
         dutyCycleControl = new DutyCycleOut(speed);
-        motor.setControl(dutyCycleControl);
+        motor.set(speed);
     }
 
     @Override
@@ -136,13 +130,6 @@ public class Robot extends TimedRobot {
                 } else if (color.green > color.red && color.green > color.blue) detectedColor = "Green";
                 else if (color.blue > color.red && color.blue > color.green) detectedColor = "Blue";
                 else if (color.red > 0.4 && color.green > 0.4 && color.blue > 0.4) detectedColor = "White";
-
-                System.out.println("========================================");
-                System.out.printf("COLOR SENSOR: %s%n", detectedColor);
-                System.out.printf("R=%.3f  G=%.3f  B=%.3f  Proximity=%d%n",
-                                  color.red, color.green, color.blue, proximity);
-                System.out.println("========================================");
-                System.out.flush();
             } catch (Exception e) {
                 System.out.println("✗ ERROR reading color sensor: " + e.getMessage());
                 e.printStackTrace();
